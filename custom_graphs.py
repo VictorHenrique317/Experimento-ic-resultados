@@ -252,7 +252,7 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
         plt.show()
 
 
-dimension = 3
+dimension = 2
 experiment_type = "synthetic"
 
 
@@ -263,4 +263,4 @@ OBSERVATIONS_LEGEND_ORDER = [3, 1, 2, 0, 4]
 
 base_folder = f"{experiment_type}/{dimension}d"
 # makeGraph(Attribute.RSS_EVOLUTION, "observations", scale='linear')
-makeGraph(Attribute.RUN_TIME, 14, 10, save=False)
+makeGraph(Attribute.RSS_EVOLUTION, 14, 10, save=True)
