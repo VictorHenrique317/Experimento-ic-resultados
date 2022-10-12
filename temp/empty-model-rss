@@ -1,0 +1,35 @@
+#!/bin/sh
+
+if [ -z "$1" ]
+then
+    printf "Usage: $0 tensor
+"
+    exit
+fi
+
+TMP=`mktemp -t nclusterbox-rss.XXXXXX`
+trap "rm $TMP 2>/dev/null" 0
+
+# sizes of the dimensions
+gawk '
+{
+    for (i = 1; i != NF; ++i)
+        dim[i][$i] }
+
+END {
+    for (i in dim)
+        print length(dim[i]) }' "$1" > $TMP
+
+prefix="$(basename "$1")"
+
+# RSS of null model
+awk -v area=1 -v density=$(awk '{ sum += $NF } END { print sum }' "$1") '
+{
+    if (FILENAME == ARGV[1]) {
+        area *= $0
+        density /= $0 }
+    else
+        residual = $NF - density
+        rss += residual * residual }
+
+END { print 0, rss + (area - FNR) * density * density }' $TMP "$1" > "$prefix-RSS"
