@@ -176,17 +176,37 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
         if attribute == Attribute.RSS_EVOLUTION:
             # str_formatter = '{x:.2f}'
             grid_fontsize = fontsize+1
-            if "tubeinputnclusterbox" not in algorithm:
+            if algorithm == "fuzzy#nclusterbox":
                 continue
+
+            if algorithm == "fuzzy#slownclusterbox":
+                continue
+
+            if algorithm == "fuzzy#tubeinputslownclusterbox":
+                continue
+
 
             observations = match[0][1]
             color = translateColor(algorithm)
-            order = []
+
+            if rss_co == 1 and dimension == 3:
+                order = [0]
+
+            elif rss_co == 16 and dimension == 3:
+                order = [0, 1]
+
+            if rss_co == 1 and dimension == 2:
+                order = [0, 1]
+
+            elif rss_co == 16 and dimension == 2:
+                order = [0, 1]
+            # order = []
 
             title = f"rss-evolution-co{rss_co}"
             if observations != f"co{rss_co}":
                 continue
 
+            print(algorithm)
             str_formatter = '{x: .0f}'
             y_str_formatter = '{x: .0f}'
 
@@ -198,7 +218,11 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
             # x_ticks[0] = 1
 
             # plt.plot(x, y, label=translateLabel(observations), color=color)
-            plt.plot(x, y, color=color, linewidth=linewidth)
+            if algorithm == "fuzzy#getf":
+                plt.plot(x, y, color=color, linewidth=linewidth, zorder=10, label=translateLabel(algorithm))
+                plt.scatter(x, y, color=color, s=scatter_size, zorder=10)
+
+            plt.plot(x, y, color=color, linewidth=linewidth, label=translateLabel(algorithm))
             plt.scatter(x, y, color=color, s=scatter_size)
             plt.yscale("linear")
             plt.xscale("linear")
@@ -287,9 +311,9 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
     handles, labels = plt.gca().get_legend_handles_labels()
     # print(labels)
     print(labels)
+    print(order)
     plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], fontsize=legend_fontsize)
 
-    print(order)
     
     # plt.legend()
     axis.tick_params(labelsize=grid_fontsize)
@@ -310,10 +334,10 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
         plt.show()
 
 
-dimension = 3
+dimension = 2
 experiment_type = "synthetic"
-rss_co = 16
-attribute = Attribute.RUN_TIME
+rss_co = 1
+attribute = Attribute.RSS_EVOLUTION
 
 # ALGORITHM_RUNTIME_LEGEND_ORDER = [4, 0, 1, 2, 3] # run time 3D
 ALGORITHM_QUALITY_LEGEND_ORDER = [4, 0, 1, 2, 3] # quality 3D
