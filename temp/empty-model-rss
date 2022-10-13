@@ -32,4 +32,4 @@ awk -v area=1 -v density=$(awk '{ sum += $NF } END { print sum }' "$1") '
         residual = $NF - density
         rss += residual * residual }
 
-END { print 0, rss + (area - FNR) * density * density }' $TMP "$1" > "$prefix-RSS"
+END { print 0, rss + (area - FNR) * density * density }' $TMP "$1"

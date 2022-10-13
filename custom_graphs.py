@@ -1,3 +1,4 @@
+from turtle import left
 import matplotlib
 
 # matplotlib.use('agg')
@@ -20,12 +21,31 @@ class Attribute(enum.Enum):
 
 
 def readPlottingDataFile(path):
-    x = []
-    y = []
+    # empty model RSS's
+    # 3D => co1 = 55814.44, co16 = 4463.152
+    # 2D => co1 = 65192.94, co16 = 71131.84
+    if dimension == 3 and rss_co == 1 and attribute == Attribute.RSS_EVOLUTION:
+        x = [0]
+        y = [55814.44] 
+    if dimension == 3 and rss_co == 16 and attribute == Attribute.RSS_EVOLUTION:
+        x = [0]
+        y = [4463.152]
+
+    if dimension == 2 and rss_co == 1 and attribute == Attribute.RSS_EVOLUTION:
+        x = [0]
+        y = [65192.94]
+    if dimension == 2 and rss_co == 16 and attribute == Attribute.RSS_EVOLUTION:
+        x = [0]
+        y = [71131.84]
+
+    if attribute != Attribute.RSS_EVOLUTION:
+        x = []
+        y = []
+
     with open(path, "r") as file:
         json_object = json.load(file)
-        x = json_object['x']
-        y = json_object['y']
+        x += json_object['x']
+        y += json_object['y']
 
     return x, y
 
@@ -67,7 +87,7 @@ def translateLabel(algorithm):
     if algorithm == "fuzzy#slownclusterbox" and dimension == 3:
         return "TriclusterBox"
 
-    if algorithm == "fuzzy#tubeinputnclusterbox" and dimension == 3:
+    if algorithm == "fuzzy#tubeinputnclusterbox":
         return "NclusterBox"
 
     if algorithm == "fuzzy#tubeinputslownclusterbox" and dimension == 3:
@@ -120,15 +140,25 @@ def translateColor(algorithm):
 
 
 def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
+    # plt.rcParams["font.weight"] = "bold"
+    # plt.rcParams["axes.labelweight"] = "bold"
+    plt.rcParams['axes.linewidth'] = 6
+    # plt.tight_layout()
+
     # axis = plt.gca()
     fig, axis = plt.subplots()
     fig = plt.figure(figsize=(figure_width, figure_height))
+    # plt.subplots_adjust(left=0.16, bottom=0.11, right=0.96, top=0.98, wspace=0, hspace=0) # 3D
+    # plt.subplots_adjust(left=0.18, bottom=0.11, right=0.98, top=0.98, wspace=0, hspace=0) # 2D RUN TIME
+    plt.subplots_adjust(left=0.14, bottom=0.11, right=0.98, top=0.98, wspace=0, hspace=0) # 2D QUALITY
     pattern = ".*-.*-.*-(.*)-(co\d*)*"
     # fontsize = 13
-    fontsize = 20
+    fontsize = 50
     grid_fontsize = fontsize
-    legend_fontsize = 22
+    legend_fontsize = fontsize
     labelpad = 32
+    linewidth = 5
+    scatter_size = 160
     plotting_data_files = filterByAttribute(listPlottingDataFiles(), attribute)
     axis = plt.gca()
     title = ""
@@ -145,7 +175,7 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
         tensor_type = algorithm.split("#")[0]
         if attribute == Attribute.RSS_EVOLUTION:
             # str_formatter = '{x:.2f}'
-            grid_fontsize = fontsize-6
+            grid_fontsize = fontsize+1
             if "tubeinputnclusterbox" not in algorithm:
                 continue
 
@@ -153,8 +183,8 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
             color = translateColor(algorithm)
             order = []
 
-            title = "RSS evolution across multiple noise levels"
-            if observations != "co16":
+            title = f"rss-evolution-co{rss_co}"
+            if observations != f"co{rss_co}":
                 continue
 
             str_formatter = '{x: .0f}'
@@ -162,14 +192,14 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
 
             x, y = readPlottingDataFile(f"{base_folder}/{plotting_data_file}")
 
-            x = x[:20]
-            y = y[:20]
-            x_ticks = [tick for tick in range(0, max(x) + 1, 1)]
-            x_ticks[0] = 1
+            x = x[:21]
+            y = y[:21]
+            x_ticks = [tick for tick in range(0, max(x) + 1, 2)]
+            # x_ticks[0] = 1
 
             # plt.plot(x, y, label=translateLabel(observations), color=color)
-            plt.plot(x, y, color=color)
-            plt.scatter(x, y, color=color)
+            plt.plot(x, y, color=color, linewidth=linewidth)
+            plt.scatter(x, y, color=color, s=scatter_size)
             plt.yscale("linear")
             plt.xscale("linear")
             plt.ylabel("RSS", fontsize=fontsize, labelpad=labelpad)
@@ -196,8 +226,14 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
                 if algorithm == "fuzzy#tubeinputslownclusterbox":
                     continue
 
-                algorithm_quality_legend_order = [0,1,2]
-                order = algorithm_quality_legend_order
+                algorithm_quality_legend_order_3d = [0,1,2]
+                algorithm_quality_legend_order_2d = [1, 0]
+
+                if dimension == 3:
+                    order = algorithm_quality_legend_order_3d
+
+                if dimension == 2:
+                    order = algorithm_quality_legend_order_2d
 
                 title = "Quality"
                 grid_fontsize = fontsize - 4
@@ -209,31 +245,52 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
                     continue
                 # axis.set_ylim(0, 45)
                 axis.set_ylim(0, 45)
-                algorithm_runtime_legend_order = [3, 0, 1, 2]
-                order = algorithm_runtime_legend_order
+                algorithm_runtime_legend_order_3d = [3, 0, 1, 2]
+                algorithm_runtime_legend_order_2d = [0, 2, 1]
+
+                if dimension == 3:
+                    order = algorithm_runtime_legend_order_3d
+                    plt.yscale("linear")
+
+                if dimension == 2:
+                    order = algorithm_runtime_legend_order_2d
+                    axis.set_ylim((0.5, 4000))
+                    plt.yscale("log")
+
                 y_str_formatter = '{x: .2f}'
                 grid_fontsize = fontsize - 4
-                title = "Run time (seconds)"
+                title = "Run time"
                 plt.ylabel("run time (seconds)", fontsize=fontsize, labelpad=labelpad)
-                plt.yscale("linear")
+                
 
             color = translateColor(algorithm)
-            print("=========================")
-            print(f"{algorithm}")
-            print(f"{color}")
+            # print("=========================")
+            # print(f"{algorithm}")
+            # print(f"{color}")
             # order = ALGORITHM_LEGEND_ORDER
 
             x, y = readPlottingDataFile(f"{base_folder}/{plotting_data_file}")
             plt.xlim(max(x), min(x))
-            plt.plot(x, y, label=translateLabel(algorithm), color=color)
-            plt.scatter(x, y, color=color)
+            
+            plt.plot(x, y, label=translateLabel(algorithm), color=color, linewidth=linewidth)
+            plt.scatter(x, y, color=color, s=scatter_size)
             # plt.yscale("linear")
-            plt.xscale("log", basex=2)
+            # plt.xscale("log", basex=2)
+            plt.xscale("log", base=2)
             plt.xlabel("number of correct observations", fontsize=fontsize, labelpad=labelpad)
 
-    print(order)
+            # axis.set_yticklabels(axis.get_yticks(), weight='bold')
+            
+            
+            # plt.subplots_adjust(right=0.1)
+
     handles, labels = plt.gca().get_legend_handles_labels()
+    # print(labels)
+    print(labels)
     plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], fontsize=legend_fontsize)
+
+    print(order)
+    
     # plt.legend()
     axis.tick_params(labelsize=grid_fontsize)
 
@@ -254,7 +311,8 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
 
 dimension = 2
 experiment_type = "synthetic"
-
+rss_co = 16
+attribute = Attribute.QUALITY
 
 # ALGORITHM_RUNTIME_LEGEND_ORDER = [4, 0, 1, 2, 3] # run time 3D
 ALGORITHM_QUALITY_LEGEND_ORDER = [4, 0, 1, 2, 3] # quality 3D
@@ -263,4 +321,4 @@ OBSERVATIONS_LEGEND_ORDER = [3, 1, 2, 0, 4]
 
 base_folder = f"{experiment_type}/{dimension}d"
 # makeGraph(Attribute.RSS_EVOLUTION, "observations", scale='linear')
-makeGraph(Attribute.RSS_EVOLUTION, 14, 10, save=True)
+makeGraph(attribute, 24, 18, save=True)
