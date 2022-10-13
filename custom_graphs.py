@@ -148,9 +148,9 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
     # axis = plt.gca()
     fig, axis = plt.subplots()
     fig = plt.figure(figsize=(figure_width, figure_height))
-    # plt.subplots_adjust(left=0.16, bottom=0.11, right=0.96, top=0.98, wspace=0, hspace=0) # 3D
+    plt.subplots_adjust(left=0.16, bottom=0.11, right=0.96, top=0.98, wspace=0, hspace=0) # 3D
     # plt.subplots_adjust(left=0.18, bottom=0.11, right=0.98, top=0.98, wspace=0, hspace=0) # 2D RUN TIME
-    plt.subplots_adjust(left=0.14, bottom=0.11, right=0.98, top=0.98, wspace=0, hspace=0) # 2D QUALITY
+    # plt.subplots_adjust(left=0.14, bottom=0.11, right=0.98, top=0.98, wspace=0, hspace=0) # 2D QUALITY
     pattern = ".*-.*-.*-(.*)-(co\d*)*"
     # fontsize = 13
     fontsize = 50
@@ -237,7 +237,7 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
 
                 title = "Quality"
                 grid_fontsize = fontsize - 4
-                axis.set_ylim((-0.008, 1.008))
+                axis.set_ylim((-0.02, 1.008))
                 plt.ylabel("quality", fontsize=fontsize, labelpad=labelpad)
 
             elif attribute == Attribute.RUN_TIME:
@@ -275,8 +275,8 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
             plt.plot(x, y, label=translateLabel(algorithm), color=color, linewidth=linewidth)
             plt.scatter(x, y, color=color, s=scatter_size)
             # plt.yscale("linear")
-            # plt.xscale("log", basex=2)
-            plt.xscale("log", base=2)
+            plt.xscale("log", basex=2)
+            # plt.xscale("log", base=2)
             plt.xlabel("number of correct observations", fontsize=fontsize, labelpad=labelpad)
 
             # axis.set_yticklabels(axis.get_yticks(), weight='bold')
@@ -304,15 +304,16 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
 
     if save:
         plt.savefig(f"{base_folder}/saves/{title.lower().replace(' ', '-')}")
+        plt.savefig(f"{base_folder}/saves/{title.lower().replace(' ', '-')}.eps", format='eps')
         plt.close(fig)
     else:
         plt.show()
 
 
-dimension = 2
+dimension = 3
 experiment_type = "synthetic"
 rss_co = 16
-attribute = Attribute.QUALITY
+attribute = Attribute.RUN_TIME
 
 # ALGORITHM_RUNTIME_LEGEND_ORDER = [4, 0, 1, 2, 3] # run time 3D
 ALGORITHM_QUALITY_LEGEND_ORDER = [4, 0, 1, 2, 3] # quality 3D
