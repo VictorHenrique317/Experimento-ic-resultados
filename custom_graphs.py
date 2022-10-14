@@ -153,7 +153,8 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
     fig = plt.figure(figsize=(figure_width, figure_height))
     # plt.subplots_adjust(left=0.2, bottom=0.18, right=0.96, top=0.98, wspace=0, hspace=0) # 3D
     # plt.subplots_adjust(left=0.25, bottom=0.18, right=0.98, top=0.98, wspace=0, hspace=0) # 2D RUN TIME
-    plt.subplots_adjust(left=0.2, bottom=0.18, right=0.96, top=0.98, wspace=0, hspace=0) # 2D QUALITY
+    # plt.subplots_adjust(left=0.2, bottom=0.18, right=0.96, top=0.98, wspace=0, hspace=0) # 2D QUALITY
+    plt.subplots_adjust(left=0.2, bottom=0.20, right=0.96, top=0.96, wspace=0, hspace=0) # 2D TRUNCATED QUALITY
     pattern = ".*-.*-.*-(.*)-(co\d*)*"
     # fontsize = 13
     fontsize = 70
@@ -271,6 +272,30 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
                 axis.set_ylim((-0.02, 1.008))
                 plt.ylabel("quality", fontsize=fontsize, labelpad=labelpad)
 
+            elif attribute == Attribute.TRUNCATED_QUALITY:
+                y_str_formatter = '{x: .2f}'
+                if algorithm == "fuzzy#nclusterbox":
+                    continue
+
+                if algorithm == "fuzzy#tubeinputslownclusterbox":
+                    continue
+
+                # algorithm_quality_legend_order_3d = [1,0,2]
+                algorithm_quality_legend_order_3d = [0]
+                # algorithm_quality_legend_order_2d = [1, 0]
+                algorithm_quality_legend_order_2d = [0]
+
+                if dimension == 3:
+                    order = algorithm_quality_legend_order_3d
+
+                if dimension == 2:
+                    order = algorithm_quality_legend_order_2d
+
+                title = "truncated-quality"
+                grid_fontsize = fontsize
+                axis.set_ylim((-0.02, 1.008))
+                plt.ylabel("Quallity for NclusterBox (patterns #2-#11)", fontsize=fontsize, labelpad=labelpad)
+
             elif attribute == Attribute.RUN_TIME:
                 if algorithm == "fuzzy#nclusterbox":
                     continue
@@ -336,9 +361,11 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
     # rcParams['axes.titlepad'] = 32
 
     if save:
+        print(f"saving {base_folder}/saves/{title.lower().replace(' ', '-')} ...")
         plt.savefig(f"{base_folder}/saves/{title.lower().replace(' ', '-')}")
         plt.savefig(f"{base_folder}/saves/{title.lower().replace(' ', '-')}.eps", format='eps')
         plt.close(fig)
+        print("saved")
     else:
         plt.show()
 
@@ -346,7 +373,7 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
 dimension = 2
 experiment_type = "synthetic"
 rss_co = 16
-attribute = Attribute.RSS_EVOLUTION
+attribute = Attribute.TRUNCATED_QUALITY
 
 # ALGORITHM_RUNTIME_LEGEND_ORDER = [4, 0, 1, 2, 3] # run time 3D
 ALGORITHM_QUALITY_LEGEND_ORDER = [4, 0, 1, 2, 3] # quality 3D
