@@ -142,21 +142,24 @@ def translateColor(algorithm):
 def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
     # plt.rcParams["font.weight"] = "bold"
     # plt.rcParams["axes.labelweight"] = "bold"
-    plt.rcParams['axes.linewidth'] = 6
+    plt.rcParams['axes.linewidth'] = 8
+    plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams['xtick.major.pad']= 40
+    plt.rcParams['ytick.major.pad']= 40
     # plt.tight_layout()
 
     # axis = plt.gca()
     fig, axis = plt.subplots()
     fig = plt.figure(figsize=(figure_width, figure_height))
-    plt.subplots_adjust(left=0.16, bottom=0.11, right=0.96, top=0.98, wspace=0, hspace=0) # 3D
-    # plt.subplots_adjust(left=0.18, bottom=0.11, right=0.98, top=0.98, wspace=0, hspace=0) # 2D RUN TIME
-    # plt.subplots_adjust(left=0.14, bottom=0.11, right=0.98, top=0.98, wspace=0, hspace=0) # 2D QUALITY
+    # plt.subplots_adjust(left=0.2, bottom=0.18, right=0.96, top=0.98, wspace=0, hspace=0) # 3D
+    # plt.subplots_adjust(left=0.25, bottom=0.18, right=0.98, top=0.98, wspace=0, hspace=0) # 2D RUN TIME
+    plt.subplots_adjust(left=0.2, bottom=0.18, right=0.96, top=0.98, wspace=0, hspace=0) # 2D QUALITY
     pattern = ".*-.*-.*-(.*)-(co\d*)*"
     # fontsize = 13
-    fontsize = 50
+    fontsize = 70
     grid_fontsize = fontsize
     legend_fontsize = fontsize
-    labelpad = 32
+    labelpad = 50
     linewidth = 5
     scatter_size = 160
     plotting_data_files = filterByAttribute(listPlottingDataFiles(), attribute)
@@ -215,6 +218,9 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
             x = x[:21]
             y = y[:21]
             x_ticks = [tick for tick in range(0, max(x) + 1, 2)]
+            # y_ticks = [tick for tick in range(int(min(y)), int(max(y)) + 1, 200)]
+            y_ticks = [tick for tick in range(int(min(y)), int(max(y)) + 1, 5000)]
+            # y_ticks = [tick for tick in range(int(min(y)), int(max(y)) + 1, 37)]
             # x_ticks[0] = 1
 
             # plt.plot(x, y, label=translateLabel(observations), color=color)
@@ -229,6 +235,7 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
             plt.ylabel("RSS", fontsize=fontsize, labelpad=labelpad)
             plt.xlabel("number of patterns selected by truncation of Alg. 5's output", fontsize=fontsize, labelpad=labelpad)
             axis.set_xticks(x_ticks)
+            axis.set_yticks(y_ticks)
 
         else:  # other graphs
             str_formatter = '{x: .0f}'
@@ -250,7 +257,7 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
                 if algorithm == "fuzzy#tubeinputslownclusterbox":
                     continue
 
-                algorithm_quality_legend_order_3d = [0,1,2]
+                algorithm_quality_legend_order_3d = [1,0,2]
                 algorithm_quality_legend_order_2d = [1, 0]
 
                 if dimension == 3:
@@ -260,7 +267,7 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
                     order = algorithm_quality_legend_order_2d
 
                 title = "Quality"
-                grid_fontsize = fontsize - 4
+                grid_fontsize = fontsize
                 axis.set_ylim((-0.02, 1.008))
                 plt.ylabel("quality", fontsize=fontsize, labelpad=labelpad)
 
@@ -282,7 +289,8 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
                     plt.yscale("log")
 
                 y_str_formatter = '{x: .2f}'
-                grid_fontsize = fontsize - 4
+                grid_fontsize = fontsize
+                legend_fontsize -= 4
                 title = "Run time"
                 plt.ylabel("run time (seconds)", fontsize=fontsize, labelpad=labelpad)
                 
@@ -318,7 +326,8 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
     # plt.legend()
     axis.tick_params(labelsize=grid_fontsize)
 
-    plt.grid()
+    # plt.grid(linestyle="--")
+    plt.grid(linestyle=(0, (5, 10)), color="black")
     # plt.title(title, y=1.05, fontsize=fontsize)
     # axis.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
     axis.get_xaxis().set_major_formatter(matplotlib.ticker.StrMethodFormatter(f'{str_formatter}'))
@@ -336,7 +345,7 @@ def makeGraph(attribute: Attribute, figure_width, figure_height, save=False):
 
 dimension = 2
 experiment_type = "synthetic"
-rss_co = 1
+rss_co = 16
 attribute = Attribute.RSS_EVOLUTION
 
 # ALGORITHM_RUNTIME_LEGEND_ORDER = [4, 0, 1, 2, 3] # run time 3D
@@ -346,4 +355,5 @@ OBSERVATIONS_LEGEND_ORDER = [3, 1, 2, 0, 4]
 
 base_folder = f"{experiment_type}/{dimension}d"
 # makeGraph(Attribute.RSS_EVOLUTION, "observations", scale='linear')
-makeGraph(attribute, 24, 18, save=True)
+# makeGraph(attribute, 24, 18, save=True)
+makeGraph(attribute, 28, 18, save=True) # rss evolution
